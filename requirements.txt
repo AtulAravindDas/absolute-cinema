@@ -1,0 +1,7 @@
+#Google Cloud Libraries
+google-genai
+google-cloud-aiplatform
+google-cloud-storage
+
+# Utilities
+python-dotenv
