@@ -146,7 +146,7 @@ Built for the **Google Cloud x Gemini Hackathon** — showcasing Gemini's native
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Apache License 2.0 — see [LICENSE](LICENSE) for details.
 
 ---
 
