@@ -11,4 +11,9 @@ response = client.models.generate_content(
     config=CONFIG,
 )
 
-print(response.text)
+for content in response.candidates[0].content.parts:
+    if content.text:
+        print(content.text)
+    elif content.inline_data:
+        with open("panel_1.png", "wb") as f:
+            f.write(content.inline_data.data)
