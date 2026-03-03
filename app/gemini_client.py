@@ -7,7 +7,7 @@ load_dotenv()
 
 PROJECT_ID = os.getenv("GCP_PROJECT_ID")
 LOCATION = os.getenv("GCP_LOCATION", "us-central1")
-MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-preview-image-generation")
 
 def get_client() -> genai.Client:
     """Instantiate and return the Gemini client via Vertex AI."""
