@@ -2,7 +2,7 @@ import os
 from google import genai
 from dotenv import load_dotenv
 
-# Load environment variables from .env
+
 load_dotenv()
 
 PROJECT_ID = os.getenv("GCP_PROJECT_ID")
@@ -21,7 +21,7 @@ def get_client() -> genai.Client:
     )
     return client
 
-# Shared client instance — import this directly in other modules
+
 client = get_client()
 
 if __name__ == "__main__":
