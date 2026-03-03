@@ -32,7 +32,7 @@ for i in range(1, page_limit+1):
             page_narration += content.text
         elif content.inline_data:
             j += 1
-            with open(f"output/images/page_{i}_panel_{j}.png", "wb") as f:
+            with open(f"outputs/images/page_{i}_panel_{j}.png", "wb") as f:
                 f.write(content.inline_data.data)
     
     story_so_far += f"\nPage {i}: {page_narration}"
