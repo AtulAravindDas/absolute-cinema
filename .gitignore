@@ -4,6 +4,5 @@ __pycache__/
 .DS_Store
 venv/
 
-# Ignore the .png files
-
-
+# Ignore the output files
+outputs/
