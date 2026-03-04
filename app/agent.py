@@ -34,5 +34,19 @@ for i in range(1, page_limit+1):
             j += 1
             with open(f"outputs/images/page_{i}_panel_{j}.png", "wb") as f:
                 f.write(content.inline_data.data)
+    if j < 3:
+        for panel_number in range(j+1, 4):
+            print(f"Retrying page {i} panel {panel_number}...")
+            page_prompt = f"{prompt}\n\nStory so far: {story_so_far}\n\nGenerate only the image for Page {i} Panel {panel_number} of this story"
+            retry_response = client.models.generate_content(
+                model=os.getenv("GEMINI_MODEL"),
+                contents=page_prompt,
+                config=CONFIG,
+            )
+            for retry_content in retry_response.candidates[0].content.parts:
+                if retry_content.inline_data:
+                    j += 1
+                    with open(f"outputs/images/page_{i}_panel_{j}.png", "wb") as f:
+                        f.write(retry_content.inline_data.data)
     
     story_so_far += f"\nPage {i}: {page_narration}"
