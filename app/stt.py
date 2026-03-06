@@ -51,3 +51,11 @@ for result in response.results:
     transcript += result.alternatives[0].transcript
 
 print(transcript)
+
+edited = input(f"Transcript: '{transcript}'\nPress Enter to confirm or type your correction: ")
+
+story_context = edited if edited.strip() else transcript
+
+print(story_context)
+
+
