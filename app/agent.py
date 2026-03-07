@@ -1,10 +1,17 @@
 from gemini_client import client
+from stt import transcribe_audio
 import os
+
 CONFIG = {
     "response_modalities": ["TEXT","IMAGE"],
 }
 
-story_context = input("Enter the story context:")
+choice = input("Type or Speak your story? (t/s): ").strip().lower()
+if choice == "s":
+    story_context = transcribe_audio()
+else:
+    story_context = input("Enter the story context: ")
+
 genre=input("Enter the genre:")
 visual_style=input("Enter the visual style:")
 page_limit=int(input("Enter the page limit:"))
