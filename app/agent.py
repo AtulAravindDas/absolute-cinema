@@ -1,6 +1,7 @@
 from gemini_client import client
 from stt import transcribe_audio
 import os
+import time
 
 CONFIG = {
     "response_modalities": ["TEXT","IMAGE"],
@@ -44,6 +45,7 @@ for i in range(1, page_limit+1):
     if j < 3:
         for panel_number in range(j+1, 4):
             print(f"Retrying page {i} panel {panel_number}...")
+            time.sleep(5)
             page_prompt = f"{prompt}\n\nStory so far: {story_so_far}\n\nGenerate only the image for Page {i} Panel {panel_number} of this story"
             retry_response = client.models.generate_content(
                 model=os.getenv("GEMINI_MODEL"),
@@ -57,3 +59,4 @@ for i in range(1, page_limit+1):
                         f.write(retry_content.inline_data.data)
     
     story_so_far += f"\nPage {i}: {page_narration}"
+    time.sleep(2)
