@@ -5,4 +5,7 @@ __pycache__/
 venv/
 
 # Ignore the output files
-outputs/images
+outputs/images/
+
+# Ignore all .wav files
+/*.wav
