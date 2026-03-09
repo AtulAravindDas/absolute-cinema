@@ -7,3 +7,6 @@ pyaudio
 
 # Utilities
 python-dotenv
+
+# Pillow
+Pillow
