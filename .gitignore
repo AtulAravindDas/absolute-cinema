@@ -6,6 +6,7 @@ venv/
 
 # Ignore the output files
 outputs/images/
+outputs/pages/
 
 # Ignore all .wav files
 /*.wav

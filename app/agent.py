@@ -1,6 +1,21 @@
 from gemini_client import client,MODEL
 from stt import transcribe_audio
+from stitcher import stitch_page
 import os
+
+def parse_panel_text(text):
+    narration = ""
+    dialogue = ""
+    if "NARRATION:" in text:
+        after_narration = text.split("NARRATION:")[1]
+        if "DIALOGUE:" in after_narration:
+            narration = after_narration.split("DIALOGUE:")[0].strip()
+            dialogue = after_narration.split("DIALOGUE:")[1].strip()
+        else:
+            narration = after_narration.strip()
+    elif "DIALOGUE:" in text:
+        dialogue = text.split("DIALOGUE:")[1].strip()
+    return (narration, dialogue)
 
 CONFIG = {"response_modalities": ["TEXT", "IMAGE"]}
 
@@ -28,7 +43,7 @@ os.makedirs("outputs/images", exist_ok=True)
 os.makedirs("outputs/pages", exist_ok=True)
 
 
-print(f"\n🎬 Generating cover page...")
+print(f"\n Generating cover page...")
 cover_prompt = (
     f"Generate a single full cinematic cover image for a comic book with the following context: {story_context}. "
     f"Genre: {genre}. Visual style: {visual_style}. "
@@ -41,12 +56,15 @@ for content in cover_response.candidates[0].content.parts:
     if content.inline_data:
         with open("outputs/pages/cover.png", "wb") as f:
             f.write(content.inline_data.data)
-        print("  🎬 Cover saved → outputs/pages/cover.png")
+        print(" Cover saved → outputs/pages/cover.png")
 
 
 story_so_far = ""
+
 for i in range(1, page_limit + 1):
-    print(f"\n📄 Generating page {i} of {page_limit}...")
+    print(f"\n Generating page {i} of {page_limit}...")
+    panel_texts = []
+    current_text = ""
 
     page_prompt = (
         f"{prompt}\n\n"
@@ -65,17 +83,19 @@ for i in range(1, page_limit + 1):
         if content.text:
             print(content.text)
             page_narration += content.text
+            current_text += content.text
         elif content.inline_data:
             j += 1
             path = f"outputs/images/page_{i}_panel_{j}.png"
+            panel_texts.append(current_text.strip())
+            current_text = ""
             with open(path, "wb") as f:
                 f.write(content.inline_data.data)
-            print(f"  ✅ Saved {path}")
+            print(f" Saved {path}")
 
-    
     if j < 3:
         for panel_number in range(j + 1, 4):
-            print(f"  🔁 Missing panel {panel_number} — retrying...")
+            print(f"  Missing panel {panel_number} — retrying...")
             retry_prompt = (
                 f"{prompt}\n\n"
                 f"Story so far: {story_so_far}\n\n"
@@ -89,12 +109,16 @@ for i in range(1, page_limit + 1):
                     path = f"outputs/images/page_{i}_panel_{j}.png"
                     with open(path, "wb") as f:
                         f.write(retry_content.inline_data.data)
-                    print(f"  ✅ Saved {path}")
-
+                    print(f" Saved {path}")
     
+    panel_texts = [parse_panel_text(t) for t in panel_texts]
+    while len(panel_texts) < 3:
+        panel_texts.append(("", ""))
+    stitch_page(i, panel_texts)
+
     pages = story_so_far.strip().split("\n")
     if len(pages) >= 3:
         story_so_far = "\n".join(pages[-3:])
+    
     story_so_far += f"\nPage {i}: {page_narration.strip()}"
-
-print("\n🎬 Comic generation complete!")
+print("\n Comic generation complete!")
