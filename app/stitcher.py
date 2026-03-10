@@ -26,6 +26,12 @@ LINE_H=30
 TEXT_PADDING = 10
 MAX_LINES = 6
 
+def load_panel(path, w, h):
+    try:
+        return Image.open(path).convert("RGB").resize((w, h), Image.LANCZOS)
+    except FileNotFoundError:
+        return Image.new("RGB", (w, h), BG_COLOR)
+
 def _wrap_text(text, font, max_width, draw):
     word_list = text.split(" ")
     lines=[]
