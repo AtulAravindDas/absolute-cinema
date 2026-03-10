@@ -25,7 +25,7 @@ def get_client() -> genai.Client:
                 attempts=5,
                 http_status_codes=[408, 429, 500, 502, 503, 504],
             ),
-            timeout=120 * 1000,
+            timeout=300 * 1000,
         ),
     )
     return client
