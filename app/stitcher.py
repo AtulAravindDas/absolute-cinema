@@ -24,6 +24,13 @@ PANEL_W=PAGE_W-2*BORDER
 BOT_W=(PANEL_W - GUTTER) // 2
 LINE_H=30
 TEXT_PADDING = 10
+MAX_LINES = 6
+
+def load_panel(path, w, h):
+    try:
+        return Image.open(path).convert("RGB").resize((w, h), Image.LANCZOS)
+    except FileNotFoundError:
+        return Image.new("RGB", (w, h), BG_COLOR)
 
 def _wrap_text(text, font, max_width, draw):
     word_list = text.split(" ")
@@ -41,10 +48,11 @@ def _wrap_text(text, font, max_width, draw):
     return lines
 
 def _draw_text_overlay(img, narration, dialogue):
-    draw=ImageDraw.Draw(img)
-    narration_lines=_wrap_text(narration, narration_font, BOT_W, draw)
-    dialogue_lines=_wrap_text(dialogue, dialogue_font, BOT_W, draw)
+    draw = ImageDraw.Draw(img)
+    narration_lines = _wrap_text(narration, narration_font, img.width - TEXT_PADDING * 2, draw)
+    dialogue_lines = _wrap_text(dialogue, dialogue_font, img.width - TEXT_PADDING * 2, draw)
     lines = [("narr", line) for line in narration_lines] + [("dial", line) for line in dialogue_lines]
+    lines = lines[:MAX_LINES]
     bar_h = len(lines) * LINE_H + TEXT_PADDING * 2
     y0 = img.height - bar_h - TEXT_PADDING
 
@@ -90,10 +98,3 @@ def stitch_page(page_num, panel_texts, image_dir="outputs/images", output_dir="o
     return out_path
 
     
-
-panel_texts = [
-    ("The Etihad Stadium. The final day. United face City.", "Bruno: Keep pushing lads!"),
-    ("The second half begins. City press harder.", "Coach: Hold the line!"),
-    ("United defend brilliantly despite the pressure.", "Defender: Mark him!")
-]
-stitch_page(1, panel_texts)
