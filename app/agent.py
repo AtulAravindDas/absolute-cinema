@@ -27,8 +27,6 @@ def parse_panel_text(text):
 CONFIG = {"response_modalities": ["TEXT", "IMAGE"]}
 
 
-
-
 def generate_comic(story_context, genre, visual_style, page_limit):
     shutil.rmtree("outputs/images", ignore_errors=True)
     shutil.rmtree("outputs/pages", ignore_errors=True)
@@ -47,10 +45,6 @@ def generate_comic(story_context, genre, visual_style, page_limit):
         f"so they can be clearly distinguished."
     )
 
-    os.makedirs("outputs/images", exist_ok=True)
-    os.makedirs("outputs/pages", exist_ok=True)
-
-    print(f"\n Generating cover page...")
     cover_prompt = (
         f"Generate a single full cinematic cover image for a comic book with the following context: {story_context}. "
         f"Genre: {genre}. Visual style: {visual_style}. "
@@ -63,13 +57,12 @@ def generate_comic(story_context, genre, visual_style, page_limit):
         if content.inline_data:
             with open("outputs/pages/cover.png", "wb") as f:
                 f.write(content.inline_data.data)
-            print(" Cover saved → outputs/pages/cover.png")
+
+    yield "cover"
 
     story_so_far = ""
 
     for i in range(1, page_limit + 1):
-        print(f"\n Generating page {i} of {page_limit}...")
-
         page_prompt = (
             f"{prompt}\n\n"
             f"Story so far: {story_so_far}\n\n"
@@ -85,18 +78,15 @@ def generate_comic(story_context, genre, visual_style, page_limit):
 
         for content in response.candidates[0].content.parts:
             if content.text:
-                print(content.text)
                 page_narration += re.sub(r'\*+', '', content.text)
             elif content.inline_data:
                 j += 1
                 path = f"outputs/images/page_{i}_panel_{j}.png"
                 with open(path, "wb") as f:
                     f.write(content.inline_data.data)
-                print(f" Saved {path}")
 
         if j < 3:
             for panel_number in range(j + 1, 4):
-                print(f"  Missing panel {panel_number} — retrying...")
                 retry_prompt = (
                     f"{prompt}\n\n"
                     f"Story so far: {story_so_far}\n\n"
@@ -110,7 +100,6 @@ def generate_comic(story_context, genre, visual_style, page_limit):
                         path = f"outputs/images/page_{i}_panel_{j}.png"
                         with open(path, "wb") as f:
                             f.write(retry_content.inline_data.data)
-                        print(f" Saved {path}")
 
         chunks = re.split(r'Panel\s*\d+', page_narration, flags=re.IGNORECASE)
         chunks = [c.strip() for c in chunks if c.strip()]
@@ -125,4 +114,4 @@ def generate_comic(story_context, genre, visual_style, page_limit):
             story_so_far = "\n".join(pages[-3:])
         story_so_far += f"\nPage {i}: {page_narration.strip()}"
 
-    print("\n Comic generation complete!")
+        yield f"page_{i}"
