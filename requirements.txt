@@ -10,3 +10,6 @@ python-dotenv
 
 # Pillow
 Pillow
+
+#Streamlit
+streamlit
