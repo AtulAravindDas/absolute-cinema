@@ -1,5 +1,5 @@
-from gemini_client import client, MODEL
-from stitcher import stitch_page
+from app.gemini_client import client, MODEL
+from app.stitcher import stitch_page
 import os
 import re
 import shutil
