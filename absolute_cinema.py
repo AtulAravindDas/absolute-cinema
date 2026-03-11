@@ -3,17 +3,20 @@ from app.stt import transcribe_audio
 import streamlit as st
 import os
 
-st.title("AbsoluteCinema")
+st.title("🎬 AbsoluteCinema")
 st.subheader("Transform your story into a cinematic comic book")
 
 choice = st.radio("Input method", ("Type", "Speak"))
 
 if choice == "Speak":
-    if st.button("Record"):
-        story_context = transcribe_audio()
+    audio = st.audio_input("Record your story")
+    if audio:
+        story_context = transcribe_audio(audio.read())
         st.session_state["story_context"] = story_context
     story_context = st.session_state.get("story_context", "")
-    st.write(f"Transcribed: {story_context}")
+    if story_context:
+        story_context = st.text_area("Edit transcription if needed", value=story_context)
+        st.session_state["story_context"] = story_context
 else:
     story_context = st.text_area("Enter the story context")
 
@@ -21,14 +24,14 @@ genre = st.selectbox("Genre", ["Fable", "Sci-Fi", "Fantasy", "Horror", "Romance"
 visual_style = st.selectbox("Visual Style", ["American Comic", "Manga", "Painted/Cinematic", "Noir", "Watercolor", "Retro Pop Art", "Anime", "Graphic Novel", "Webtoon", "Storyboard", "Art Nouveau", "Cyberpunk", "Studio Ghibli"])
 page_limit = st.slider("Number of Pages", min_value=1, max_value=10, value=3)
 
-if st.button("Generate Comic"):
+if st.button("🎬 Generate Comic"):
     if not story_context:
         st.error("Please enter a story context!")
     else:
         with st.spinner("Generating your comic..."):
             generate_comic(story_context, genre, visual_style, page_limit)
         
-        st.success("Comic generated!")
+        st.success("✅ Comic generated!")
         
         cover_path = "outputs/pages/cover.png"
         if os.path.exists(cover_path):
