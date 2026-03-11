@@ -1,24 +1,23 @@
-import os
 from google import genai
 from google.genai import types
-from dotenv import load_dotenv
+from google.oauth2 import service_account
+import streamlit as st
+import os
 
-
-load_dotenv()
-
-PROJECT_ID = os.getenv("GCP_PROJECT_ID")
-LOCATION = os.getenv("GCP_LOCATION", "global")
+GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID") or st.secrets.get("GCP_PROJECT_ID")
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-image")
 
-def get_client() -> genai.Client:
-    """Instantiate and return the Gemini client via Vertex AI."""
-    if not PROJECT_ID:
-        raise ValueError("GCP_PROJECT_ID is not set. Check your .env file.")
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=["https://www.googleapis.com/auth/cloud-platform"]
+)
 
+def get_client() -> genai.Client:
     client = genai.Client(
         vertexai=True,
-        project=PROJECT_ID,
-        location=LOCATION,
+        project=GCP_PROJECT_ID,
+        location="global",
+        credentials=credentials,
         http_options=types.HttpOptions(
             retry_options=types.HttpRetryOptions(
                 initial_delay=1.0,
@@ -30,11 +29,4 @@ def get_client() -> genai.Client:
     )
     return client
 
-
 client = get_client()
-
-if __name__ == "__main__":
-    print(f"✅ Gemini client initialized.")
-    print(f"   Project  : {PROJECT_ID}")
-    print(f"   Location : {LOCATION}")
-    print(f"   Model    : {MODEL}")
