@@ -1,4 +1,5 @@
 from google.cloud import speech
+from google.oauth2 import service_account
 import streamlit as st
 
 def transcribe_audio(audio_bytes):
