@@ -75,26 +75,22 @@ def _draw_text_overlay(img, narration, dialogue):
 def stitch_page(page_num, panel_texts, image_dir="outputs/images", output_dir="outputs/pages"):
     os.makedirs(output_dir, exist_ok=True)
     page = Image.new("RGB", (PAGE_W, PAGE_H), BG_COLOR)
-    path = os.path.join(image_dir, f"page_{page_num}_panel_1.png")
-    p1 = Image.open(path).convert("RGB").resize((PANEL_W, TOP_H), Image.LANCZOS)
 
-    p1=_draw_text_overlay(p1,panel_texts[0][0], panel_texts[0][1])
+    path = os.path.join(image_dir, f"page_{page_num}_panel_1.png")
+    p1 = load_panel(path, PANEL_W, TOP_H)
+    p1 = _draw_text_overlay(p1, panel_texts[0][0], panel_texts[0][1])
     page.paste(p1, (BORDER, BORDER))
 
     path = os.path.join(image_dir, f"page_{page_num}_panel_2.png")
-    p2 = Image.open(path).convert("RGB").resize((BOT_W, BOTTOM_H), Image.LANCZOS)
-
-    p2 =_draw_text_overlay(p2,panel_texts[1][0], panel_texts[1][1])
+    p2 = load_panel(path, BOT_W, BOTTOM_H)
+    p2 = _draw_text_overlay(p2, panel_texts[1][0], panel_texts[1][1])
     page.paste(p2, (BORDER, BORDER + TOP_H + GUTTER))
 
     path = os.path.join(image_dir, f"page_{page_num}_panel_3.png")
-    p3 = Image.open(path).convert("RGB").resize((BOT_W, BOTTOM_H), Image.LANCZOS)
-
+    p3 = load_panel(path, BOT_W, BOTTOM_H)
     p3 = _draw_text_overlay(p3, panel_texts[2][0], panel_texts[2][1])
     page.paste(p3, (BORDER + BOT_W + GUTTER, BORDER + TOP_H + GUTTER))
 
     out_path = os.path.join(output_dir, f"page_{page_num}.png")
     page.save(out_path)
     return out_path
-
-    

@@ -1,20 +1,32 @@
-from gemini_client import client,MODEL
+from gemini_client import client, MODEL
 from stt import transcribe_audio
 from stitcher import stitch_page
 import os
+import re
+import shutil
+shutil.rmtree("outputs/images", ignore_errors=True)
+shutil.rmtree("outputs/pages", ignore_errors=True)
+os.makedirs("outputs/images", exist_ok=True)
+os.makedirs("outputs/pages", exist_ok=True)
+
 
 def parse_panel_text(text):
     narration = ""
     dialogue = ""
     if "NARRATION:" in text:
-        after_narration = text.split("NARRATION:")[1]
+        parts = text.split("NARRATION:")
+        after_narration = parts[1]
         if "DIALOGUE:" in after_narration:
             narration = after_narration.split("DIALOGUE:")[0].strip()
-            dialogue = after_narration.split("DIALOGUE:")[1].strip()
         else:
             narration = after_narration.strip()
-    elif "DIALOGUE:" in text:
-        dialogue = text.split("DIALOGUE:")[1].strip()
+    if "DIALOGUE:" in text:
+        dialogue_parts = text.split("DIALOGUE:")[1:]
+        dialogue = " / ".join(p.split("NARRATION:")[0].strip() for p in dialogue_parts)
+    if narration.lower() == "none":
+        narration = ""
+    if dialogue.lower() == "none":
+        dialogue = ""
     return (narration, dialogue)
 
 CONFIG = {"response_modalities": ["TEXT", "IMAGE"]}
@@ -25,7 +37,6 @@ story_context = transcribe_audio() if choice == "s" else input("Enter the story 
 genre        = input("Enter the genre: ")
 visual_style = input("Enter the visual style: ")
 page_limit   = int(input("Enter the page limit: "))
-
 
 prompt = (
     f"Given the story context: {story_context}, generate a comic book in the {genre} genre "
@@ -42,7 +53,6 @@ prompt = (
 os.makedirs("outputs/images", exist_ok=True)
 os.makedirs("outputs/pages", exist_ok=True)
 
-
 print(f"\n Generating cover page...")
 cover_prompt = (
     f"Generate a single full cinematic cover image for a comic book with the following context: {story_context}. "
@@ -58,13 +68,10 @@ for content in cover_response.candidates[0].content.parts:
             f.write(content.inline_data.data)
         print(" Cover saved → outputs/pages/cover.png")
 
-
 story_so_far = ""
 
 for i in range(1, page_limit + 1):
     print(f"\n Generating page {i} of {page_limit}...")
-    panel_texts = []
-    current_text = ""
 
     page_prompt = (
         f"{prompt}\n\n"
@@ -82,13 +89,10 @@ for i in range(1, page_limit + 1):
     for content in response.candidates[0].content.parts:
         if content.text:
             print(content.text)
-            page_narration += content.text
-            current_text += content.text
+            page_narration += re.sub(r'\*+', '', content.text)
         elif content.inline_data:
             j += 1
             path = f"outputs/images/page_{i}_panel_{j}.png"
-            panel_texts.append(current_text.strip())
-            current_text = ""
             with open(path, "wb") as f:
                 f.write(content.inline_data.data)
             print(f" Saved {path}")
@@ -110,15 +114,18 @@ for i in range(1, page_limit + 1):
                     with open(path, "wb") as f:
                         f.write(retry_content.inline_data.data)
                     print(f" Saved {path}")
-    
-    panel_texts = [parse_panel_text(t) for t in panel_texts]
-    while len(panel_texts) < 3:
-        panel_texts.append(("", ""))
+
+    chunks = re.split(r'Panel\s*\d+', page_narration, flags=re.IGNORECASE)
+    chunks = [c.strip() for c in chunks if c.strip()]
+    while len(chunks) < 4:
+        chunks.append("")
+    panel_texts = [parse_panel_text(chunks[k+1]) for k in range(3)]
+
     stitch_page(i, panel_texts)
 
     pages = story_so_far.strip().split("\n")
     if len(pages) >= 3:
         story_so_far = "\n".join(pages[-3:])
-    
     story_so_far += f"\nPage {i}: {page_narration.strip()}"
+
 print("\n Comic generation complete!")
