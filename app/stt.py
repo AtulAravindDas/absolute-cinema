@@ -5,7 +5,7 @@ def transcribe_audio(audio_bytes):
 
     audio = speech.RecognitionAudio(content=audio_bytes)
     config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
         sample_rate_hertz=16000,
         language_code="en-US",
     )
