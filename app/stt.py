@@ -1,7 +1,11 @@
 from google.cloud import speech
+import streamlit as st
 
 def transcribe_audio(audio_bytes):
-    stt_client = speech.SpeechClient()
+    stt_client = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
 
     audio = speech.RecognitionAudio(content=audio_bytes)
     config = speech.RecognitionConfig(
