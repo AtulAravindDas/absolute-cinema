@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 
+CONFIG = {"response_modalities": ["TEXT", "IMAGE"]}
 
 def parse_panel_text(text):
     narration = ""
@@ -22,10 +23,14 @@ def parse_panel_text(text):
         narration = ""
     if dialogue.lower() == "none":
         dialogue = ""
+
+    # Strip "Page X" and "None" leakage
+    narration = re.sub(r'Page\s*\d+[,.]?', '', narration).strip()
+    dialogue = re.sub(r'Page\s*\d+[,.]?', '', dialogue).strip()
+    narration = "\n".join(l for l in narration.splitlines() if l.strip().lower() != "none")
+    dialogue = "\n".join(l for l in dialogue.splitlines() if l.strip().lower() != "none")
+
     return (narration, dialogue)
-
-CONFIG = {"response_modalities": ["TEXT", "IMAGE"]}
-
 
 def generate_comic(story_context, genre, visual_style, page_limit):
     shutil.rmtree("outputs/images", ignore_errors=True)
