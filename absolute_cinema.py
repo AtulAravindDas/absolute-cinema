@@ -1,7 +1,9 @@
 from app.agent import generate_comic
 from app.stt import transcribe_audio
 import streamlit as st
+import sys
 import os
+sys.path.insert(0, os.path.dirname(__file__))
 
 st.title("🎬 AbsoluteCinema")
 st.subheader("Transform your story into a cinematic comic book")
