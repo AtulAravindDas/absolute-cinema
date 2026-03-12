@@ -61,7 +61,7 @@ def generate_comic(story_context, genre, visual_style, page_limit,session_id):
 
     for content in cover_response.candidates[0].content.parts:
         if content.inline_data:
-            with open("outputs/pages/cover.png", "wb") as f:
+            with open(f"{pages_dir}/cover.png", "wb") as f:
                 f.write(content.inline_data.data)
 
     yield "cover"
@@ -87,7 +87,7 @@ def generate_comic(story_context, genre, visual_style, page_limit,session_id):
                 page_narration += re.sub(r'\*+', '', content.text)
             elif content.inline_data:
                 j += 1
-                path = f"outputs/images/page_{i}_panel_{j}.png"
+                path = f"{image_dir}/page_{i}_panel_{j}.png"
                 with open(path, "wb") as f:
                     f.write(content.inline_data.data)
 
@@ -103,7 +103,7 @@ def generate_comic(story_context, genre, visual_style, page_limit,session_id):
                     for retry_content in retry_response.candidates[0].content.parts:
                         if retry_content.inline_data:
                             j += 1
-                            path = f"outputs/images/page_{i}_panel_{j}.png"
+                            path = f"{image_dir}/page_{i}_panel_{j}.png"
                             with open(path, "wb") as f:
                                 f.write(retry_content.inline_data.data)
         chunks = re.split(r'Panel\s*\d+', page_narration, flags=re.IGNORECASE)
@@ -112,7 +112,7 @@ def generate_comic(story_context, genre, visual_style, page_limit,session_id):
             chunks.append("")
         panel_texts = [parse_panel_text(chunks[k+1]) for k in range(3)]
 
-        stitch_page(i, panel_texts)
+        stitch_page(i, panel_texts, image_dir=image_dir, output_dir=pages_dir)
 
         pages = story_so_far.strip().split("\n")
         if len(pages) >= 3:
