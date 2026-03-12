@@ -92,15 +92,14 @@ def generate_comic(story_context, genre, visual_style, page_limit):
                     f"Story so far: {story_so_far}\n\n"
                     f"Generate only the image for Page {i} Panel {panel_number} of this story."
                 )
-                retry_response = client.models.generate_content(
-                    model=MODEL, contents=retry_prompt, config=CONFIG)
-                for retry_content in retry_response.candidates[0].content.parts:
-                    if retry_content.inline_data:
-                        j += 1
-                        path = f"outputs/images/page_{i}_panel_{j}.png"
-                        with open(path, "wb") as f:
-                            f.write(retry_content.inline_data.data)
-
+                retry_response = client.models.generate_content(model=MODEL, contents=retry_prompt, config=CONFIG)
+                if retry_response.candidates:
+                    for retry_content in retry_response.candidates[0].content.parts:
+                        if retry_content.inline_data:
+                            j += 1
+                            path = f"outputs/images/page_{i}_panel_{j}.png"
+                            with open(path, "wb") as f:
+                                f.write(retry_content.inline_data.data)
         chunks = re.split(r'Panel\s*\d+', page_narration, flags=re.IGNORECASE)
         chunks = [c.strip() for c in chunks if c.strip()]
         while len(chunks) < 4:
