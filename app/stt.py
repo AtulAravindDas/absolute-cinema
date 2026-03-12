@@ -3,19 +3,21 @@ from google.oauth2 import service_account
 import streamlit as st
 
 def transcribe_audio(audio_bytes):
-    stt_client = service_account.Credentials.from_service_account_info(
+    credentials = service_account.Credentials.from_service_account_info(
         st.secrets["gcp_service_account"],
         scopes=["https://www.googleapis.com/auth/cloud-platform"]
     )
+    
+    stt_client = speech.SpeechClient(credentials=credentials)
 
-    audio = speech.RecognitionAudio(content=audio_bytes)
+    recognition_audio = speech.RecognitionAudio(content=audio_bytes)
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
-        sample_rate_hertz=16000,
+        sample_rate_hertz=48000,
         language_code="en-US",
     )
 
-    response = stt_client.recognize(config=config, audio=audio)
+    response = stt_client.recognize(config=config, audio=recognition_audio)
 
     transcript = ""
     for result in response.results:
