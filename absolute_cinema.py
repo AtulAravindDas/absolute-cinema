@@ -38,14 +38,14 @@ if st.button("🎬 Generate Comic"):
                 progress_bar.progress(int(1 / total_steps * 100))
                 cover_path = "outputs/pages/cover.png"
                 if os.path.exists(cover_path):
-                    st.image(cover_path, caption="Cover", use_container_width=True)
+                    st.image(cover_path, caption="Cover", width='stretch')
             else:
                 page_num = int(update.split("_")[1])
                 status_text.text(f"📖 Page {page_num} of {page_limit} generated!")
                 progress_bar.progress(int((page_num + 1) / total_steps * 100))
                 page_path = f"outputs/pages/page_{page_num}.png"
                 if os.path.exists(page_path):
-                    st.image(page_path, caption=f"Page {page_num}", use_container_width=True)
+                    st.image(page_path, caption=f"Page {page_num}", width='stretch')
 
         progress_bar.progress(100)
         status_text.text("✅ Comic generation complete!")
