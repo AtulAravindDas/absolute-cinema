@@ -3,10 +3,17 @@ from app.stt import transcribe_audio
 import streamlit as st
 import sys
 import os
+import uuid
+
 sys.path.insert(0, os.path.dirname(__file__))
 
-st.title("AbsoluteCinema")
+st.title("🎬 AbsoluteCinema")
 st.subheader("Transform your story into a cinematic comic book")
+
+if "session_id" not in st.session_state:
+    st.session_state["session_id"] = str(uuid.uuid4())[:8]
+
+session_id = st.session_state["session_id"]
 
 if not st.session_state.get("viewing"):
 
@@ -36,17 +43,17 @@ if not st.session_state.get("viewing"):
             status_text = st.empty()
             total_steps = page_limit + 1
 
-            for update in generate_comic(story_context, genre, visual_style, page_limit):
+            for update in generate_comic(story_context, genre, visual_style, page_limit, session_id):
                 if update == "cover":
-                    status_text.text("Cover generated!")
+                    status_text.text("🎨 Cover generated!")
                     progress_bar.progress(int(1 / total_steps * 100))
                 else:
                     page_num = int(update.split("_")[1])
-                    status_text.text(f"Page {page_num} of {page_limit} generated!")
+                    status_text.text(f"📖 Page {page_num} of {page_limit} generated!")
                     progress_bar.progress(int((page_num + 1) / total_steps * 100))
 
             progress_bar.progress(100)
-            status_text.text("Comic generation complete!")
+            status_text.text("✅ Comic generation complete!")
             st.session_state["generated"] = True
             st.session_state["page_limit"] = page_limit
             st.session_state["current_page"] = 0
@@ -62,10 +69,10 @@ else:
     total_pages = page_limit + 1
 
     if current_page == 0:
-        path = "outputs/pages/cover.png"
+        path = f"outputs/{session_id}/pages/cover.png"
         caption = "Cover"
     else:
-        path = f"outputs/pages/page_{current_page}.png"
+        path = f"outputs/{session_id}/pages/page_{current_page}.png"
         caption = f"Page {current_page} of {page_limit}"
 
     if os.path.exists(path):
@@ -80,7 +87,7 @@ else:
                 st.session_state["current_page"] -= 1
                 st.rerun()
     with col2:
-        if st.button("New Comic"):
+        if st.button("🏠 New Comic"):
             st.session_state["viewing"] = False
             st.session_state["generated"] = False
             st.session_state["current_page"] = 0

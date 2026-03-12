@@ -32,11 +32,12 @@ def parse_panel_text(text):
 
     return (narration, dialogue)
 
-def generate_comic(story_context, genre, visual_style, page_limit):
-    shutil.rmtree("outputs/images", ignore_errors=True)
-    shutil.rmtree("outputs/pages", ignore_errors=True)
-    os.makedirs("outputs/images", exist_ok=True)
-    os.makedirs("outputs/pages", exist_ok=True)
+def generate_comic(story_context, genre, visual_style, page_limit,session_id):
+    image_dir = f"outputs/{session_id}/images"
+    pages_dir = f"outputs/{session_id}/pages"
+    shutil.rmtree(f"outputs/{session_id}", ignore_errors=True)
+    os.makedirs(image_dir, exist_ok=True)
+    os.makedirs(pages_dir, exist_ok=True)
 
     prompt = (
         f"Given the story context: {story_context}, generate a comic book in the {genre} genre "
