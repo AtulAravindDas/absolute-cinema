@@ -12,8 +12,8 @@ def transcribe_audio(audio_bytes):
 
     recognition_audio = speech.RecognitionAudio(content=audio_bytes)
     config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.OGG_OPUS,
-        sample_rate_hertz=48000,
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=16000,
         language_code="en-US",
         enable_automatic_punctuation=True,
     )
