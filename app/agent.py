@@ -56,16 +56,17 @@ def generate_comic(story_context, genre, visual_style, page_limit,session_id):
         f"Genre: {genre}. Visual style: {visual_style}. "
         f"Make it dramatic, bold and cinematic with the comic title visible. No panels, just one epic cover image."
     )
-    cover_response = client.models.generate_content(
-        model=MODEL, contents=cover_prompt, config=CONFIG)
-
-    for content in cover_response.candidates[0].content.parts:
-        if content.inline_data:
-            with open(f"{pages_dir}/cover.png", "wb") as f:
-                f.write(content.inline_data.data)
-
+    for attempt in range(3):
+        cover_response = client.models.generate_content(
+            model=MODEL, contents=cover_prompt, config=CONFIG)
+        if cover_response.candidates and cover_response.candidates[0].content.parts:
+            for content in cover_response.candidates[0].content.parts:
+                if content.inline_data:
+                    with open(f"{pages_dir}/cover.png", "wb") as f:
+                        f.write(content.inline_data.data)
+                    break
+            break
     yield "cover"
-
     story_so_far = ""
 
     for i in range(1, page_limit + 1):
@@ -78,6 +79,9 @@ def generate_comic(story_context, genre, visual_style, page_limit,session_id):
 
         response = client.models.generate_content(
             model=MODEL, contents=page_prompt, config=CONFIG)
+        if not response.candidates or not response.candidates[0].content.parts:
+            yield f"page_{i}"
+            continue
 
         j = 0
         page_narration = ""
