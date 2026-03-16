@@ -104,7 +104,7 @@ def generate_comic(story_context, genre, visual_style, page_limit,session_id):
                 )
                 for attempt in range(3):
                     retry_response = client.models.generate_content(model=MODEL, contents=retry_prompt, config=CONFIG)
-                    if retry_response.candidates:
+                    if retry_response.candidates and retry_response.candidates[0].content and retry_response.candidates[0].content.parts:
                         for retry_content in retry_response.candidates[0].content.parts:
                             if retry_content.inline_data:
                                 j += 1
